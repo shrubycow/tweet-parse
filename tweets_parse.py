@@ -6,7 +6,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import JavascriptException, StaleElementReferenceException, NoSuchElementException
 import time
 import traceback
-import json
 import requests
 
 
@@ -102,10 +101,6 @@ class TweetsParse:
                 if self.__scroll_and_check():
                     break
                 time.sleep(self.__sleeping_time)
-                try:
-                    print(TweetsParse.driver.execute_script('return document.querySelector("div.css-1dbjc4n.r-1omma8c").firstChild;'))
-                except JavascriptException:
-                    pass
                 TweetsParse.driver.execute_script("window.scrollBy(0, 150);")
 
                 tweet_blocks = WebDriverWait(TweetsParse.driver, self.__wait_tag_time).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR,
@@ -133,7 +128,11 @@ class TweetsParse:
 
         if not save_to_file:
             print(self.__tweet_ids)
-            requests.post('https://tweets-parse.herokuapp.com/save/', json={'account': self.__account, 'id_n_likes': self.__tweet_ids})
+            response = requests.post('https://tweets-parse.herokuapp.com/save/', json={'account': self.__account, 'id_n_likes': self.__tweet_ids})
+            if response.status_code == 200:
+                print('Загрузилось на heroku')
+            else:
+                print('Что-то пошло не так', response.text)
 
         else:
             with open(self.__account+"_tweets.txt", 'w') as file:
@@ -143,8 +142,6 @@ class TweetsParse:
 
 if __name__ == "__main__":
     TweetsParse.set_driver_settings()
-    TweetsParse.login('Alexandriyskiy', '115577sah')
+    TweetsParse.login('login', 'password')
     my_page = TweetsParse('21jqofa', 1000)
-    my_page.parse(save_to_file=True)
-
-# TweetsParse.set_driver_settings(); TweetsParse.login('Alexandriyskiy', '115577sah'); my_page = TweetsParse('21jqofa', 1000); my_page.parse()
+    my_page.parse()
