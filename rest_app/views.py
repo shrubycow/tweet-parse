@@ -1,4 +1,4 @@
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponse
 from .models import TweetIds
 from .serializers import TweetIdSerializer
 
@@ -24,3 +24,9 @@ def id_list(request):
         for tweet_id in my_list:
             TweetIds.objects.filter(id=tweet_id).update(is_posted=True)
         return JsonResponse(serializer.data, safe=False)
+
+def save(request):
+
+    if request.method == 'POST':
+        json_data = request.body
+        return HttpResponse(json_data)

@@ -15,9 +15,10 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
-from rest_app.views import id_list
+from rest_app.views import id_list, save
 
 urlpatterns = [
     path('rest/', id_list, name='id_list'),
+    path('save/', save, name='save'),
     path('admin/', admin.site.urls),
 ]

@@ -4,11 +4,10 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import JavascriptException, StaleElementReferenceException, NoSuchElementException
-# from rest_app.models import TweetIds
-from django.db.utils import IntegrityError
 import time
 import traceback
-import os
+import json
+import requests
 
 
 class TweetsParse:
@@ -133,12 +132,9 @@ class TweetsParse:
             print(traceback.format_exc())
 
         if not save_to_file:
-            for tweet_id, likes in self.__tweet_ids.items():
-                print(tweet_id, likes)
-                try:
-                    TweetIds.objects.create(id=tweet_id, likes=likes, account=self.__account)
-                except IntegrityError:
-                    pass
+            print(self.__tweet_ids)
+            requests.post('https://tweets-parse.herokuapp.com/save/', json={'account': self.__account, 'id_n_likes': self.__tweet_ids})
+
         else:
             with open(self.__account+"_tweets.txt", 'w') as file:
                 for tweet_id, likes in self.__tweet_ids.items():
