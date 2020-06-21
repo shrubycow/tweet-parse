@@ -1,6 +1,8 @@
 from django.http import JsonResponse, HttpResponse
+from django.db.utils import IntegrityError
 from .models import TweetIds
 from .serializers import TweetIdSerializer
+import json
 
 # Create your views here.
 def id_list(request):
@@ -25,8 +27,14 @@ def id_list(request):
             TweetIds.objects.filter(id=tweet_id).update(is_posted=True)
         return JsonResponse(serializer.data, safe=False)
 
+
 def save(request):
 
     if request.method == 'POST':
-        json_data = request.body
-        return HttpResponse(json_data)
+        json_data = json.loads(request.body)
+        account = json_data['account']
+        for tweet_id, likes in json_data['id_n_likes'].items():
+            try:
+                TweetIds.objects.create(id=tweet_id, likes=likes, account=account)
+            except IntegrityError:
+                pass
