@@ -4,7 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import JavascriptException, StaleElementReferenceException, NoSuchElementException
-from rest_app.models import TweetIds
+# from rest_app.models import TweetIds
 import time
 import traceback
 import os
@@ -61,12 +61,12 @@ class TweetsParse:
         TweetsParse.driver.execute_script("window.scrollBy(0, 150);")
         if TweetsParse.driver.execute_script("return window.pageYOffset;") == before_scroll:
             before_scroll = TweetsParse.driver.execute_script("return window.pageYOffset;")
-            time.sleep(self.__sleeping_time * 10)
+            time.sleep(self.__sleeping_time * 5)
             TweetsParse.driver.execute_script("window.scrollBy(0, 150);")
             time.sleep(self.__sleeping_time)
             if TweetsParse.driver.execute_script("return window.pageYOffset;") == before_scroll:
                 before_scroll = TweetsParse.driver.execute_script("return window.pageYOffset;")
-                time.sleep(self.__sleeping_time * 20)
+                time.sleep(self.__sleeping_time * 30)
                 TweetsParse.driver.execute_script("window.scrollBy(0, 150);")
                 time.sleep(self.__sleeping_time)
                 if TweetsParse.driver.execute_script("return window.pageYOffset;") == before_scroll:
@@ -121,11 +121,15 @@ class TweetsParse:
                         if elem.get_attribute('data-testid') == 'like':
                             likes_elem.append(elem.find_element_by_css_selector('span.css-901oao.css-16my406.r-1qd0xha.r-ad9z0x.r-bcqeeo.r-qvutc0'))
                 likes = []
-                for i in range(self.__tweets_per_scroll):
-                    if 'тыс.' in likes_elem[i].text:
-                        likes.append(int(float(likes_elem[i].text.split(" ")[0].replace(',', '.')) * 1000))
-                    else:
-                        likes.append(int(likes_elem[i].text))
+
+                try:
+                    for i in range(self.__tweets_per_scroll):
+                        if 'тыс.' in likes_elem[i].text:
+                            likes.append(int(float(likes_elem[i].text.split(" ")[0].replace(',', '.')) * 1000))
+                        else:
+                            likes.append(int(likes_elem[i].text))
+                except IndexError:
+                    continue
                 for i in range(self.__tweets_per_scroll):
                     self.__filter_data(tweet_blocks[i], likes[i])
         except BaseException:
@@ -136,15 +140,15 @@ class TweetsParse:
                 print(tweet_id, likes)
                 TweetIds.objects.create(id=tweet_id, likes=likes, account=self.__account)
         else:
-            with open(self.__account+"_tweets.txt") as file:
+            with open(self.__account+"_tweets.txt", 'w') as file:
                 for tweet_id, likes in self.__tweet_ids.items():
                     file.write(f"{tweet_id} {likes}\n")
 
 
 if __name__ == "__main__":
     TweetsParse.set_driver_settings()
-    TweetsParse.login('login', 'password')
-    my_page = TweetsParse('Alexandriyskiy', 3)
-    my_page.parse()
+    TweetsParse.login('Alexandriyskiy', '115577sah')
+    my_page = TweetsParse('21jqofa', 1000)
+    my_page.parse(save_to_file=True)
 
 # TweetsParse.set_driver_settings(); TweetsParse.login('Alexandriyskiy', '115577sah'); my_page = TweetsParse('21jqofa', 1000); my_page.parse()
