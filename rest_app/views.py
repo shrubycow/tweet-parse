@@ -40,3 +40,4 @@ def save(request):
                 TweetIds.objects.create(id=tweet_id, likes=likes, account=account)
             except IntegrityError:
                 pass
+        return HttpResponse('Success')
