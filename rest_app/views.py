@@ -1,5 +1,6 @@
 from django.http import JsonResponse, HttpResponse
 from django.db.utils import IntegrityError
+from django.views.decorators.csrf import csrf_exempt
 from .models import TweetIds
 from .serializers import TweetIdSerializer
 import json
@@ -27,7 +28,7 @@ def id_list(request):
             TweetIds.objects.filter(id=tweet_id).update(is_posted=True)
         return JsonResponse(serializer.data, safe=False)
 
-
+@csrf_exempt
 def save(request):
 
     if request.method == 'POST':
