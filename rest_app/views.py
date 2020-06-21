@@ -32,6 +32,7 @@ def save(request):
 
     if request.method == 'POST':
         json_data = json.loads(request.body)
+        print(request.body)
         account = json_data['account']
         for tweet_id, likes in json_data['id_n_likes'].items():
             try:
