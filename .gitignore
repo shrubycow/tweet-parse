@@ -1,0 +1,8 @@
+venv
+*.pyc
+staticfiles
+.env
+db.sqlite3
+test_shit4.txt
+test_shit4_official.py
+test_shit5_official.py
