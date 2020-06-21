@@ -23,3 +23,5 @@ with open('kotalkin_tweets.txt', 'r') as file:
 
 for i in range(len(ids)):        
     TweetIds.objects.create(id=ids[i], likes=likes[i], account='kotalkin')
+
+
