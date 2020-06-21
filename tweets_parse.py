@@ -5,6 +5,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import JavascriptException, StaleElementReferenceException, NoSuchElementException
 # from rest_app.models import TweetIds
+from django.db.utils import IntegrityError
 import time
 import traceback
 import os
@@ -60,19 +61,15 @@ class TweetsParse:
         time.sleep(self.__sleeping_time)
         TweetsParse.driver.execute_script("window.scrollBy(0, 150);")
         if TweetsParse.driver.execute_script("return window.pageYOffset;") == before_scroll:
-            before_scroll = TweetsParse.driver.execute_script("return window.pageYOffset;")
-            time.sleep(self.__sleeping_time * 5)
-            TweetsParse.driver.execute_script("window.scrollBy(0, 150);")
-            time.sleep(self.__sleeping_time)
-            if TweetsParse.driver.execute_script("return window.pageYOffset;") == before_scroll:
+            for i in range(40):
                 before_scroll = TweetsParse.driver.execute_script("return window.pageYOffset;")
-                time.sleep(self.__sleeping_time * 30)
-                TweetsParse.driver.execute_script("window.scrollBy(0, 150);")
                 time.sleep(self.__sleeping_time)
+                TweetsParse.driver.execute_script("window.scrollBy(0, 150);")
                 if TweetsParse.driver.execute_script("return window.pageYOffset;") == before_scroll:
-                    print("Вышел")
-                    return True
-        return False
+                    pass
+                else:
+                    return False
+        return True
 
     def __filter_data(self, tweet_block, likes):
         if likes >= self.__min_likes:
@@ -138,7 +135,10 @@ class TweetsParse:
         if not save_to_file:
             for tweet_id, likes in self.__tweet_ids.items():
                 print(tweet_id, likes)
-                TweetIds.objects.create(id=tweet_id, likes=likes, account=self.__account)
+                try:
+                    TweetIds.objects.create(id=tweet_id, likes=likes, account=self.__account)
+                except IntegrityError:
+                    pass
         else:
             with open(self.__account+"_tweets.txt", 'w') as file:
                 for tweet_id, likes in self.__tweet_ids.items():
